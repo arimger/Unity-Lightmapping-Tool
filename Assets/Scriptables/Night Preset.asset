@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af8f6cc47e3f7c54fb58d7115498bd89, type: 3}
+  m_Name: Night Preset
+  m_EditorClassIdentifier: 
+  lightingName: Night
+  targetScene: DayScene
+  texturesSets:
+  - shadowMask: {fileID: 0}
+    lightmapDir: {fileID: 2800000, guid: d2f96e5610e26764295324bf57db4026, type: 3}
+    lightmapColor: {fileID: 2800000, guid: 83b75286bdfe6bc4baffc599f13c2035, type: 3}

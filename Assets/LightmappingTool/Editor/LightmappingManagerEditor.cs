@@ -1,0 +1,2 @@
+namespace Toolbox.Lighting.Editor
+{ }
