@@ -2,20 +2,18 @@ using UnityEngine;
 
 namespace Toolbox.Lighting
 {
+    [AddComponentMenu("Toolbox/Lighting/Lightmapping Manager")]
     public class LightmappingManager : MonoBehaviour
     {
         public enum Mode
         {
-            Changer,
-            Blender,
+            Switcher,
+            Blending,
         }
 
         [SerializeField]
-        private Mode currentMode = Mode.Blender;
+        private Mode currentMode = Mode.Blending;
 
-        //TODO: use to is to cache reflection probes
-        [SerializeField]
-        private bool autoSearchRefs;
         private bool isInitialized;
 
         [Space]
@@ -34,13 +32,18 @@ namespace Toolbox.Lighting
 
         private bool ShouldBeUpdated
         {
-            get => currentMode == Mode.Blender && isInitialized;
+            get => currentMode == Mode.Blending && isInitialized;
+        }
+
+        public Mode CurrentMode
+        {
+            get => currentMode;
         }
 
 
         private void Start()
         {
-            Initialize();
+            Initialize(currentMode);
         }
 
         private void Update()
@@ -55,17 +58,30 @@ namespace Toolbox.Lighting
 
         private void OnDestroy()
         {
-            transitionPreset.Dispose();
+            transitionPreset?.Dispose();
         }
 
-        private void Initialize()
+        private void Initialize(Mode mode)
         {
-            transitionPreset = new LightmapTransitionPreset(presets);
-            //transitionPreset.SetAllowedIndexes(0);
-            transitionPreset.SetPresetsToBlend(presets[0], presets[1]);
-            transitionPreset.Update(0.0f);
-            LightmapSettings.lightmaps = transitionPreset.Lightmaps;
+            switch (mode)
+            {
+                case Mode.Blending:
+                    transitionPreset = new LightmapTransitionPreset(presets);
+                    transitionPreset.SetPresetsToBlend(presets);
+                    transitionPreset.Update(0.0f);
+                    LightmapSettings.lightmaps = transitionPreset.Lightmaps;
+                    break;
+                case Mode.Switcher:
+                    LightmapSettings.lightmaps = presets[0].Lightmaps;
+                    break;
+            }
+
             isInitialized = true;
+        }
+
+
+        public void ChangeMode(Mode mode)
+        { 
         }
     }
 }
