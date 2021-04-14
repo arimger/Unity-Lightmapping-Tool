@@ -2,8 +2,25 @@
 
 namespace Toolbox.Lighting
 {
+    [AddComponentMenu("Toolbox/Lighting/Cached Reflection Probe")]
     [RequireComponent(typeof(ReflectionProbe))]
-    internal class CachedReflectionProbe : MonoBehaviour
+    public class CachedReflectionProbe : MonoBehaviour
     {
+        [SerializeField, HideInInspector]
+        private ReflectionProbe reflectionProbe;
+
+
+        public ReflectionProbe ReflectionProbe
+        {
+            get
+            {
+                if (reflectionProbe == null)
+                {
+                    reflectionProbe = GetComponent<ReflectionProbe>();
+                }
+
+                return reflectionProbe;
+            }
+        }
     }
 }

@@ -26,8 +26,9 @@ namespace Toolbox.Lighting
 
         private bool isDirty;
 
-        private LightmapPreset presetA;
-        private LightmapPreset presetB;
+        private LightmapPreset[] presetsToBlend;
+
+        private int presetsToBlendCount;
 
         private HashSet<int> allowedIndexes;
 
@@ -104,18 +105,23 @@ namespace Toolbox.Lighting
 
         internal bool Update(float blendValue)
         {
-            if (lastBlendValue == blendValue && !isDirty)
+            if (Mathf.Approximately(lastBlendValue, blendValue) && !isDirty)
             {
                 return false;
             }
 
+            var step = 1.0f / (presetsToBlendCount - 1);
+            var indexA = Mathf.Min((int)(blendValue / step), presetsToBlendCount - 2);
+            var indexB = indexA + 1;
+            var realBlendValue = (blendValue - indexA * step) / step;
+
             //set current blending value (between 0 and 1)
-            blendingMaterial.SetFloat("_Blend", blendValue);
+            blendingMaterial.SetFloat("_Blend", realBlendValue);
 
             var targetLightmaps = Lightmaps;
             var lightmapsCount = targetLightmaps.Length;
-            var lightmapsA = presetA.Lightmaps;
-            var lightmapsB = presetB.Lightmaps;
+            var lightmapsA = presetsToBlend[indexA].Lightmaps;
+            var lightmapsB = presetsToBlend[indexB].Lightmaps;
             for (var i = 0; i < lightmapsCount; i++)
             {
                 if (!allowedIndexes.Contains(i))
@@ -127,43 +133,47 @@ namespace Toolbox.Lighting
                 var lightmapA = lightmapsA[i];
                 var lightmapB = lightmapsB[i];
 
-                //blend shadowMask texture at index
-                //blendingMaterial.SetTexture("_BlendTex", lightmapB.shadowMask);
-                //Graphics.Blit(lightmapA.shadowMask, shadowMasks[i], blendingMaterial);
-                //Graphics.CopyTexture(shadowMasks[i], target.shadowMask);
+                const string blendTextureName = "_BlendTex";
+                if (shadowMasks[i])
+                {
+                    //blend shadowMask texture at index
+                    blendingMaterial.SetTexture(blendTextureName, lightmapB.shadowMask);
+                    Graphics.Blit(lightmapA.shadowMask, shadowMasks[i], blendingMaterial);
+                    Graphics.CopyTexture(shadowMasks[i], target.shadowMask);
+                }
 
-                //blend directional texture at index
-                blendingMaterial.SetTexture("_BlendTex", lightmapB.lightmapDir);
-                Graphics.Blit(lightmapA.lightmapDir, lightmapDirs[i], blendingMaterial);
-                Graphics.CopyTexture(lightmapDirs[i], target.lightmapDir);
+                if (lightmapDirs[i])
+                {
+                    //blend directional texture at index
+                    blendingMaterial.SetTexture(blendTextureName, lightmapB.lightmapDir);
+                    Graphics.Blit(lightmapA.lightmapDir, lightmapDirs[i], blendingMaterial);
+                    Graphics.CopyTexture(lightmapDirs[i], target.lightmapDir);
+                }
 
-                //blend color texture at index
-                blendingMaterial.SetTexture("_BlendTex", lightmapB.lightmapColor);
-                Graphics.Blit(lightmapA.lightmapColor, lightmapColors[i], blendingMaterial);
-                Graphics.CopyTexture(lightmapColors[i], target.lightmapColor);
+                if (lightmapColors[i])
+                {
+                    //blend color texture at index
+                    blendingMaterial.SetTexture(blendTextureName, lightmapB.lightmapColor);
+                    Graphics.Blit(lightmapA.lightmapColor, lightmapColors[i], blendingMaterial);
+                    Graphics.CopyTexture(lightmapColors[i], target.lightmapColor);
+                }
             }
 
             lastBlendValue = blendValue;
+            isDirty = false;
             return true;
         }
 
-        internal void SetPresetsToBlend(LightmapPreset presetA, LightmapPreset presetB)
+        internal void SetPresetsToBlend(params LightmapPreset[] presetsToBlend)
         {
-            SetPresetsToBlend(presetA.LightingName, presetB.LightingName);
-        }
-
-        internal void SetPresetsToBlend(string presetA, string presetB)
-        {
-            if (!mappedPresets.TryGetValue(presetA, out this.presetA))
+            if (presetsToBlend.Length == 0)
             {
-                throw new ArgumentException(nameof(presetA));
+                throw new ArgumentException(nameof(presetsToBlend));
             }
 
-            if (!mappedPresets.TryGetValue(presetB, out this.presetB))
-            {
-                throw new ArgumentException(nameof(presetB));
-            }
-
+            //TODO: presets validation?
+            this.presetsToBlend = presetsToBlend;
+            presetsToBlendCount = presetsToBlend.Length;
             isDirty = true;
         }
 

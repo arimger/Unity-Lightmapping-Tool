@@ -7,9 +7,6 @@ namespace Toolbox.Lighting
     {
         [SerializeField]
         private string lightingName;
-        //TODO: scene name validation
-        [SerializeField]
-        private string targetScene;
 
         [Space]
 
@@ -26,12 +23,6 @@ namespace Toolbox.Lighting
         {
             get => lightingName;
             set => lightingName = value;
-        }
-
-        public string TargetScene 
-        {
-            get => targetScene; 
-            set => targetScene = value; 
         }
 
         public LightmapTexturesSet[] TexturesSets

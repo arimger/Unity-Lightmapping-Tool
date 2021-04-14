@@ -15,7 +15,6 @@ namespace Toolbox.Lighting
         internal LightmapRuntimePreset(LightmapPreset mockup)
         {
             TargetPreset = ScriptableObject.CreateInstance<LightmapPreset>();
-            TargetPreset.TargetScene = mockup.TargetScene;
             var mockupTexturesSets = mockup.TexturesSets;
             var setsCount = mockupTexturesSets.Length;
             var targetTexturesSets = new LightmapTexturesSet[setsCount];
