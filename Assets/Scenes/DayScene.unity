@@ -166,6 +166,7 @@ GameObject:
   m_Component:
   - component: {fileID: 202063127}
   - component: {fileID: 202063128}
+  - component: {fileID: 202063129}
   m_Layer: 0
   m_Name: Reflection Probe Behind Wall
   m_TagString: Untagged
@@ -220,6 +221,19 @@ ReflectionProbe:
   m_UseOcclusionCulling: 1
   m_Importance: 1
   m_CustomBakedTexture: {fileID: 0}
+--- !u!114 &202063129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 202063126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ddf8e06dff21a44aaeb5b3f87a9d5b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  reflectionProbe: {fileID: 202063128}
 --- !u!1001 &296138508
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -300,14 +314,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentMode: 1
-  autoSearchRefs: 0
+  isInitialized: 0
   presets:
   - {fileID: 11400000, guid: a036a8dea8980e246b2c1c312159ffdc, type: 2}
   - {fileID: 11400000, guid: b378e094173792b4eb04d537cce1797d, type: 2}
-  reflectionProbes:
-  - {fileID: 1904166340}
-  - {fileID: 202063128}
-  - {fileID: 1145444335}
+  probes:
+  - {fileID: 202063129}
+  - {fileID: 1145444336}
+  - {fileID: 1904166341}
+  transitionPreset:
+    allowedIndexes: 
   blendValue: 0
 --- !u!4 &513096288
 Transform:
@@ -415,6 +431,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1145444334}
   - component: {fileID: 1145444335}
+  - component: {fileID: 1145444336}
   m_Layer: 0
   m_Name: Reflection Probe Behind Frame
   m_TagString: Untagged
@@ -469,6 +486,19 @@ ReflectionProbe:
   m_UseOcclusionCulling: 1
   m_Importance: 1
   m_CustomBakedTexture: {fileID: 0}
+--- !u!114 &1145444336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1145444333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ddf8e06dff21a44aaeb5b3f87a9d5b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  reflectionProbe: {fileID: 1145444335}
 --- !u!4 &1278355951 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4354465822509128, guid: 85dfab9623c67784fa7894de63cd1604, type: 3}
@@ -931,6 +961,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1904166339}
   - component: {fileID: 1904166340}
+  - component: {fileID: 1904166341}
   m_Layer: 0
   m_Name: Reflection Probe Main
   m_TagString: Untagged
@@ -985,6 +1016,19 @@ ReflectionProbe:
   m_UseOcclusionCulling: 1
   m_Importance: 1
   m_CustomBakedTexture: {fileID: 0}
+--- !u!114 &1904166341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1904166338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ddf8e06dff21a44aaeb5b3f87a9d5b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  reflectionProbe: {fileID: 1904166340}
 --- !u!1 &1925639008
 GameObject:
   m_ObjectHideFlags: 0
