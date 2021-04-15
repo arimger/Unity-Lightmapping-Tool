@@ -13,7 +13,6 @@ namespace Toolbox.Lighting.Editor
         private LightmappingManager manager;
 
         private SerializedProperty currentModeProperty;
-        private SerializedProperty isInitializedProperty;
         private SerializedProperty initOnAwakeProperty;
         private SerializedProperty presetsProperty;
         private SerializedProperty probesProperty;
@@ -34,7 +33,6 @@ namespace Toolbox.Lighting.Editor
             presetsToBlend = new LightmapPreset[0];
 
             currentModeProperty = serializedObject.FindProperty("currentMode");
-            isInitializedProperty = serializedObject.FindProperty("isInitialized");
             initOnAwakeProperty = serializedObject.FindProperty("initOnAwake");
             presetsProperty = serializedObject.FindProperty("presets");
             probesProperty = serializedObject.FindProperty("probes");
@@ -109,6 +107,11 @@ namespace Toolbox.Lighting.Editor
             using (new EditorGUILayout.VerticalScope(Style.sectionStyle))
             {
                 EditorGUILayout.LabelField(Style.blendingModeHeaderContent, Style.headerStyle);
+                if (presetsList.count == 0)
+                {
+                    EditorGUILayout.HelpBox(Style.blendingPresetsAreEmpty.text, MessageType.Warning);
+                }
+
                 presetsList.DoLayoutList();
                 EditorGUILayout.Space();
                 probesList.DoLayoutList();
@@ -163,6 +166,11 @@ namespace Toolbox.Lighting.Editor
 
         public override void OnInspectorGUI()
         {
+            if (!manager.enabled)
+            {
+                EditorGUILayout.HelpBox(Style.managerIsDisabledContent.text, MessageType.Warning);
+            }
+
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(currentModeProperty);
@@ -174,9 +182,18 @@ namespace Toolbox.Lighting.Editor
                 }
             }
 
-            using (new EditorGUI.DisabledScope(true))
+            var isInitialized = manager.IsInitialized;
+            using (new EditorGUI.DisabledScope(isInitialized))
             {
-                EditorGUILayout.PropertyField(isInitializedProperty);
+                EditorGUI.BeginChangeCheck();
+                isInitialized = EditorGUILayout.Toggle("Is Initialized", isInitialized);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    if (isInitialized)
+                    {
+                        manager.Initialize(manager.CurrentMode);
+                    }
+                }
             }
 
             EditorGUILayout.PropertyField(initOnAwakeProperty);
@@ -199,6 +216,8 @@ namespace Toolbox.Lighting.Editor
 
         private static class Style
         {
+            internal static readonly GUIContent blendingPresetsAreEmpty = new GUIContent("Presets list is empty!");
+            internal static readonly GUIContent managerIsDisabledContent = new GUIContent("Manager is disabled!");
             internal static readonly GUIContent blendingModeHeaderContent = new GUIContent("Content");
 
             internal static readonly GUIStyle headerStyle = new GUIStyle(EditorStyles.boldLabel);

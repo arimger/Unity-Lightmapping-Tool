@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Toolbox.Lighting
 {
@@ -14,6 +13,11 @@ namespace Toolbox.Lighting
 
         internal LightmapRuntimePreset(LightmapPreset mockup)
         {
+            if (mockup == null)
+            {
+                throw new ArgumentNullException(nameof(mockup));
+            }
+
             TargetPreset = ScriptableObject.CreateInstance<LightmapPreset>();
             var mockupTexturesSets = mockup.TexturesSets;
             var setsCount = mockupTexturesSets.Length;
@@ -55,7 +59,7 @@ namespace Toolbox.Lighting
 
         public void Dispose()
         {
-            Object.Destroy(TargetPreset);
+            LightmappingManager.SafeObjectDestroy(TargetPreset);
         }
     }
 }

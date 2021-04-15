@@ -1,9 +1,13 @@
 using System;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+using Object = UnityEngine.Object;
 
 namespace Toolbox.Lighting
 {
-    [DefaultExecutionOrder(-1000)]
+    [DefaultExecutionOrder(-1000), DisallowMultipleComponent, ExecuteAlways]
     [AddComponentMenu("Toolbox/Lighting/Lightmapping Manager")]
     public class LightmappingManager : MonoBehaviour
     {
@@ -16,7 +20,6 @@ namespace Toolbox.Lighting
         [SerializeField]
         private Mode currentMode = Mode.Blending;
 
-        [SerializeField]
         private bool isInitialized;
         [SerializeField]
         private bool initOnAwake = true;
@@ -95,6 +98,7 @@ namespace Toolbox.Lighting
         private void OnDestroy()
         {
             transitionPreset?.Dispose();
+            isInitialized = false;
         }
 
         private void SetLightmaps(LightmapPreset preset)
@@ -116,36 +120,40 @@ namespace Toolbox.Lighting
 
         public void Initialize(Mode mode)
         {
+            var success = false;
             switch (mode)
             {
                 case Mode.Blending:
-                    ChangeModeToBlending(true, presets);
+                    success = ChangeModeToBlending(true, presets);
                     break;
                 case Mode.Switcher:
-                    ChangeModeToSwitcher(presets[0]);
+                    success = ChangeModeToSwitcher(presets[0]);
                     break;
             }
 
-            isInitialized = true;
+            isInitialized = success;
         }
 
-        public void ChangeModeToSwitcher(LightmapPreset presetToSwitch = null)
+        public bool ChangeModeToSwitcher(LightmapPreset presetToSwitch = null)
         {
             currentMode = Mode.Switcher;
             if (presetToSwitch != null)
             {
                 SetLightmaps(presetToSwitch);
             }
+
+            return true;
         }
 
-        public void ChangeModeToBlending(bool reset, params LightmapPreset[] presetsToBlend)
+        public bool ChangeModeToBlending(bool reset, params LightmapPreset[] presetsToBlend)
         {
-            currentMode = Mode.Blending;
-            if (transitionPreset == null)
+            if (presetsToBlend == null || presetsToBlend.Length < 2)
             {
-                transitionPreset = new LightmapTransitionPreset(presets);
+                return false;
             }
-            else if (reset)
+
+            currentMode = Mode.Blending;
+            if (transitionPreset == null || reset)
             {
                 transitionPreset = new LightmapTransitionPreset(presets);
             }
@@ -155,6 +163,7 @@ namespace Toolbox.Lighting
             transitionPreset.Update(blendValue - 0.01f);
             transitionPreset.Update(blendValue);
             SetLightmaps(transitionPreset.Lightmaps);
+            return true;
         }
 
         public void SetPresetsToBlend(params LightmapPreset[] presetsToBlend)
@@ -209,6 +218,23 @@ namespace Toolbox.Lighting
             }
 
             SetLightmaps(preset.Lightmaps);
+        }
+
+
+        public static void SafeObjectDestroy(Object target)
+        {
+#if UNITY_EDITOR
+            if (EditorApplication.isPlaying)
+            {
+                Object.Destroy(target);
+            }
+            else
+            {
+                Object.DestroyImmediate(target);
+            }
+#else
+            Object.Destroy(TargetPreset);
+#endif
         }
     }
 }

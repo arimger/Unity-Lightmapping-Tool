@@ -1,0 +1,16 @@
+{
+  "name": "com.arimger.lightmapping-tool",
+  "displayName": "Lightmapping Tool",
+  "version": "0.1.0",
+  "unity": "2018.1",
+  "description": "TODO",
+  "keywords": [
+    "TODO"
+  ],
+  "category": "rendering",
+  "author": {
+    "name": "Arimger",
+    "email": "milosz.matkowski96@gmail.com",
+    "url": "https://github.com/arimger"
+  }
+}
