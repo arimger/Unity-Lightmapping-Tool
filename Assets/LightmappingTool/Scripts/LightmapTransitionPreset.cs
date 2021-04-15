@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -21,7 +20,6 @@ namespace Toolbox.Lighting
         private readonly LightmapPreset[] presets;
 
         private Dictionary<string, LightmapPreset> mappedPresets;
-        private Dictionary<LightmapPreset, int> mappedBlendedPresets;
 
         private LightmapRuntimePreset runtimePreset;
 
@@ -33,6 +31,11 @@ namespace Toolbox.Lighting
 
         [SerializeField]
         private bool[] allowedIndexes;
+
+        /// <summary>
+        /// Used to speed-up checks.
+        /// </summary>
+        private Dictionary<LightmapPreset, int> mappedBlendedPresets;
 
 
         internal int PresetsToBlendCount { get; private set; }
@@ -108,6 +111,7 @@ namespace Toolbox.Lighting
             return renderTexture;
         }
 
+
         internal bool Update(float blendValue)
         {
             if (Mathf.Approximately(lastBlendValue, blendValue) && !isDirty)
@@ -180,9 +184,18 @@ namespace Toolbox.Lighting
             this.presetsToBlend = presetsToBlend;
             PresetsToBlendCount = presetsToBlend.Length;
             mappedBlendedPresets = new Dictionary<LightmapPreset, int>(PresetsToBlendCount);
+            LightmapPreset preset;
             for (var i = 0; i < PresetsToBlendCount; i++)
             {
-                mappedBlendedPresets.Add(presetsToBlend[i], i);
+                preset = presetsToBlend[i];
+                if (mappedBlendedPresets.ContainsKey(preset))
+                {
+                    continue;
+                }
+                else
+                {
+                    mappedBlendedPresets.Add(preset, i);
+                }
             }
 
             isDirty = true;
@@ -221,27 +234,32 @@ namespace Toolbox.Lighting
 
         public void Dispose()
         {
+            if (runtimePreset == null)
+            {
+                return;
+            }
+
             runtimePreset.Dispose();
             foreach (var shadowMask in shadowMasks)
             {
-                Object.Destroy(shadowMask);
+                LightmappingManager.SafeObjectDestroy(shadowMask);
             }
 
             foreach (var lightmapDir in lightmapDirs)
             {
-                Object.Destroy(lightmapDir);
+                LightmappingManager.SafeObjectDestroy(lightmapDir);
             }
 
             foreach (var lightmapColor in lightmapColors)
             {
-                Object.Destroy(lightmapColor);
+                LightmappingManager.SafeObjectDestroy(lightmapColor);
             }
 
             shadowMasks.Clear();
             lightmapDirs.Clear();
             lightmapColors.Clear();
 
-            Object.Destroy(blendingMaterial);
+            LightmappingManager.SafeObjectDestroy(blendingMaterial);
         }
     }
 }
