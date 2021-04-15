@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af8f6cc47e3f7c54fb58d7115498bd89, type: 3}
+  m_Name: Test2A
+  m_EditorClassIdentifier: 
+  lightingName: Test2A
+  targetScene: 
+  texturesSets:
+  - shadowMask: {fileID: 0}
+    lightmapDir: {fileID: 2800000, guid: 260533c731b3e8548a1e415be63cad7b, type: 3}
+    lightmapColor: {fileID: 2800000, guid: bf63144e69e03ee478b293483c24a902, type: 3}
+  - shadowMask: {fileID: 0}
+    lightmapDir: {fileID: 2800000, guid: 34dfdfcf77578104f8fd89d8bb672ceb, type: 3}
+    lightmapColor: {fileID: 2800000, guid: e4fcb09b9fe41b440876609336206582, type: 3}
+  - shadowMask: {fileID: 0}
+    lightmapDir: {fileID: 2800000, guid: 2c350009537d34f4f9fc03620c7e87d1, type: 3}
+    lightmapColor: {fileID: 2800000, guid: 2198c2d9976a44c4bb6c5dd362b85c11, type: 3}
+  - shadowMask: {fileID: 0}
+    lightmapDir: {fileID: 2800000, guid: ad86e37f9f5038743a6f49120f208e31, type: 3}
+    lightmapColor: {fileID: 2800000, guid: 7a74df8d178ecf5488e9fe9fc3d9f695, type: 3}
+  - shadowMask: {fileID: 0}
+    lightmapDir: {fileID: 2800000, guid: 67fe8bd81ed153244868baf869fb7ad4, type: 3}
+    lightmapColor: {fileID: 2800000, guid: 2e4c2a4d2843b8940966873af3072671, type: 3}
+  reflectionProbes: []

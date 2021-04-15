@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -8,7 +9,8 @@ namespace Toolbox.Lighting
     /// <summary>
     /// Class responsible for blending multiple lightmaps into one.
     /// </summary>
-    internal class LightmapTransitionPreset : IDisposable
+    [Serializable]
+    public class LightmapTransitionPreset : IDisposable
     {
         private readonly List<RenderTexture> shadowMasks = new List<RenderTexture>();
         private readonly List<RenderTexture> lightmapDirs = new List<RenderTexture>();
@@ -19,6 +21,7 @@ namespace Toolbox.Lighting
         private readonly LightmapPreset[] presets;
 
         private Dictionary<string, LightmapPreset> mappedPresets;
+        private Dictionary<LightmapPreset, int> mappedBlendedPresets;
 
         private LightmapRuntimePreset runtimePreset;
 
@@ -28,9 +31,11 @@ namespace Toolbox.Lighting
 
         private LightmapPreset[] presetsToBlend;
 
-        private int presetsToBlendCount;
+        [SerializeField]
+        private bool[] allowedIndexes;
 
-        private HashSet<int> allowedIndexes;
+
+        internal int PresetsToBlendCount { get; private set; }
 
 
         internal LightmapData[] Lightmaps
@@ -76,7 +81,7 @@ namespace Toolbox.Lighting
             var mockupPreset = presets[0];
             runtimePreset = new LightmapRuntimePreset(mockupPreset);
             var texturesSets = runtimePreset.TargetPreset.TexturesSets;
-            allowedIndexes = new HashSet<int>();
+            allowedIndexes = new bool[texturesSets.Length];
 
             for (var i = 0; i < texturesSets.Length; i++)
             {
@@ -84,7 +89,7 @@ namespace Toolbox.Lighting
                 shadowMasks.Add(CreateTransitionTexture(texturesSet.shadowMask));
                 lightmapDirs.Add(CreateTransitionTexture(texturesSet.lightmapDir));
                 lightmapColors.Add(CreateTransitionTexture(texturesSet.lightmapColor));
-                allowedIndexes.Add(i);
+                allowedIndexes[i] = true;
             }
         }
 
@@ -110,8 +115,8 @@ namespace Toolbox.Lighting
                 return false;
             }
 
-            var step = 1.0f / (presetsToBlendCount - 1);
-            var indexA = Mathf.Min((int)(blendValue / step), presetsToBlendCount - 2);
+            var step = 1.0f / (PresetsToBlendCount - 1);
+            var indexA = Mathf.Min((int)(blendValue / step), PresetsToBlendCount - 2);
             var indexB = indexA + 1;
             var realBlendValue = (blendValue - indexA * step) / step;
 
@@ -124,7 +129,7 @@ namespace Toolbox.Lighting
             var lightmapsB = presetsToBlend[indexB].Lightmaps;
             for (var i = 0; i < lightmapsCount; i++)
             {
-                if (!allowedIndexes.Contains(i))
+                if (!allowedIndexes[i])
                 {
                     continue;
                 }
@@ -166,20 +171,52 @@ namespace Toolbox.Lighting
 
         internal void SetPresetsToBlend(params LightmapPreset[] presetsToBlend)
         {
-            if (presetsToBlend.Length == 0)
+            if (presetsToBlend.Length < 2)
             {
                 throw new ArgumentException(nameof(presetsToBlend));
             }
 
             //TODO: presets validation?
             this.presetsToBlend = presetsToBlend;
-            presetsToBlendCount = presetsToBlend.Length;
+            PresetsToBlendCount = presetsToBlend.Length;
+            mappedBlendedPresets = new Dictionary<LightmapPreset, int>(PresetsToBlendCount);
+            for (var i = 0; i < PresetsToBlendCount; i++)
+            {
+                mappedBlendedPresets.Add(presetsToBlend[i], i);
+            }
+
             isDirty = true;
         }
 
-        internal void SetAllowedIndexes(params int[] indexes)
+        internal void SetAllowedIndexes(bool[] allowedIndexes)
         {
-            allowedIndexes = new HashSet<int>(indexes);
+            if (allowedIndexes == null)
+            {
+                throw new ArgumentNullException(nameof(allowedIndexes));
+            }
+
+            if (allowedIndexes.Length != PresetsToBlendCount)
+            {
+                throw new ArgumentException(nameof(allowedIndexes));
+            }
+
+            this.allowedIndexes = allowedIndexes;
+        }
+
+        internal bool IsPresetBlended(LightmapPreset preset, out int order)
+        {
+            order = -1;
+            if (mappedBlendedPresets == null)
+            {
+                return false;
+            }
+
+            return mappedBlendedPresets.TryGetValue(preset, out order);
+        }
+
+        internal void SetIndexAllowed(int index, bool allowed)
+        {
+            allowedIndexes[index] = allowed;
         }
 
         public void Dispose()

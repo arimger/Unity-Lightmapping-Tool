@@ -18,3 +18,8 @@ MonoBehaviour:
   - shadowMask: {fileID: 0}
     lightmapDir: {fileID: 2800000, guid: 8d5664b39536cec48a119240d18d5499, type: 3}
     lightmapColor: {fileID: 2800000, guid: c4add95e34154c84e878351d32f7c64c, type: 3}
+  reflectionProbes:
+  - {fileID: 8900000, guid: 4430a6a0bbc5f2c47b5cd9571fbc976c, type: 3}
+  - {fileID: 8900000, guid: 7521113691cdeeb47955917726877089, type: 3}
+  - {fileID: 8900000, guid: 3dc71ed4f8cd30e419751bcf994a6d2c, type: 3}
+  - {fileID: 8900000, guid: 62831714565a3dd449091f95b56d7ab8, type: 3}
