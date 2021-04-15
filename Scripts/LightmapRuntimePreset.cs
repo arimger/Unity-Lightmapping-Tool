@@ -52,6 +52,7 @@ namespace Toolbox.Lighting
             return newTexture;
         }
 
+
         public void Dispose()
         {
             Object.Destroy(TargetPreset);
