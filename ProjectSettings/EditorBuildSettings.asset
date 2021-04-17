@@ -5,7 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
+  - enabled: 1
+    path: Assets/Scenes/Test 2 - Index Blending/Test_2_Lighting_a.unity
+    guid: fc8aae0439c34a6419ca53b54fb5138c
   m_configObjects: {}
