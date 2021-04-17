@@ -22,8 +22,8 @@ namespace Toolbox.Lighting.Editor
                 },
                 drawHeaderCallback = (rect) =>
                 {
-                    label = EditorGUI.BeginProperty(rect, label, property);
-                    EditorGUI.LabelField(rect, label);
+                    var newLabel = EditorGUI.BeginProperty(rect, label, property);
+                    EditorGUI.LabelField(rect, newLabel);
                     EditorGUI.EndProperty();
                 },
             };
