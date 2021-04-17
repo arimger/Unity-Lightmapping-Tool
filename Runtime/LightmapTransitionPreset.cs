@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Toolbox.Lighting
 {
@@ -75,7 +74,7 @@ namespace Toolbox.Lighting
             mappedPresets = new Dictionary<string, LightmapPreset>(presets.Length);
             foreach (var preset in presets)
             {
-                mappedPresets.Add(preset.LightingName, preset);
+                mappedPresets.Add(preset.PresetName, preset);
             }
         }
 
