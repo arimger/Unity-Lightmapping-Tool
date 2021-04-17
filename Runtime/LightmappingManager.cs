@@ -228,14 +228,14 @@ namespace Toolbox.Lighting
 #if UNITY_EDITOR
             if (EditorApplication.isPlaying)
             {
-                Object.Destroy(target);
+                Destroy(target);
             }
             else
             {
-                Object.DestroyImmediate(target);
+                DestroyImmediate(target);
             }
 #else
-            Object.Destroy(TargetPreset);
+            Destroy(target);
 #endif
         }
     }

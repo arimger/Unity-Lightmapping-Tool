@@ -143,10 +143,9 @@ namespace Toolbox.Lighting
 
             ReflectionProbes = reflectionProbes;
         }
-
+#if UNITY_EDITOR
         private void LoadLightingData(LightingDataAsset lightingData)
         {
-#if UNITY_EDITOR
             var path = AssetDatabase.GetAssetPath(lightingData);
             var assets = AssetDatabase.LoadAllAssetsAtPath(path);
             foreach (var asset in assets)
@@ -157,9 +156,8 @@ namespace Toolbox.Lighting
                     return;
                 }
             }
-#endif
         }
-
+#endif
 
         public void LoadPresetFromDirectory()
         {
