@@ -1,7 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
+using Object = UnityEngine.Object;
 
 namespace Toolbox.Lighting.Editor
 {
@@ -12,6 +15,62 @@ namespace Toolbox.Lighting.Editor
     {
         private string pickedDirectory;
 
+
+        private int GetAssetIndexFromName(string name)
+        {
+            return int.Parse(Regex.Match(name, @"\d+").Value);
+        }
+
+        private void LoadTextures(IReadOnlyList<Texture2D> textures)
+        {
+            var highestIndex = 0;
+            var texturesSets = new LightmapTexturesSet[textures.Count];
+            foreach (var texture in textures)
+            {
+                var name = texture.name;
+                var index = GetAssetIndexFromName(name);
+                if (index > highestIndex)
+                {
+                    highestIndex = index;
+                }
+
+                if (texturesSets[index] == null)
+                {
+                    texturesSets[index] = new LightmapTexturesSet();
+                }
+
+                //TODO: cleaner way
+                if (name.EndsWith(Defaults.shadowMaskSuffix))
+                {
+                    texturesSets[index].shadowMask = texture;
+                }
+                else if (name.EndsWith(Defaults.lightmapDirSuffix))
+                {
+                    texturesSets[index].lightmapDir = texture;
+                }
+                else if (name.EndsWith(Defaults.lightmapColorSuffix))
+                {
+                    texturesSets[index].lightmapColor = texture;
+                }
+            }
+
+            Array.Resize(ref texturesSets, highestIndex + 1);
+            var preset = target as LightmapPreset;
+            preset.TexturesSets = texturesSets;
+        }
+
+        private void LoadCubemaps(IReadOnlyList<Cubemap> cubemaps)
+        {
+            foreach (var cubemap in cubemaps)
+            {
+                var index = GetAssetIndexFromName(cubemap.name);
+            }
+        }
+
+        private void LoadLightingData(LightingDataAsset lightingData)
+        {
+
+        }
 
         private void LoadPresetWithFiles()
         {
@@ -58,7 +117,10 @@ namespace Toolbox.Lighting.Editor
                 return;
             }
 
-            Debug.Log("SUCCESS");
+            LoadTextures(lightmapTextures);
+            LoadCubemaps(lightmapCubemaps);
+            LoadLightingData(lightmapData);
+            InternalLogger.Log(LogType.Log, "Preset loaded.");
         }
 
 
@@ -66,6 +128,7 @@ namespace Toolbox.Lighting.Editor
         {
             base.OnInspectorGUI();
 
+            serializedObject.Update();
             EditorGUILayout.Space();
             using (new EditorGUILayout.VerticalScope(Style.sectionStyle))
             {
@@ -85,12 +148,16 @@ namespace Toolbox.Lighting.Editor
                     }
                 }
             }
+
+            serializedObject.ApplyModifiedProperties();
         }
 
 
         private static class Defaults
         {
-
+            internal static readonly string shadowMaskSuffix = "mask";
+            internal static readonly string lightmapDirSuffix = "dir";
+            internal static readonly string lightmapColorSuffix = "light";
         }
 
         private static class Style
