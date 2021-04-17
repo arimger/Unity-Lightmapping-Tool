@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Toolbox.Lighting
 {
     /// <summary>
-    /// Creates runtime lightmap preset based on given mockup.
+    /// Creates runtime lightmap preset based on the given mockup.
     /// </summary>
     internal class LightmapRuntimePreset : IDisposable
     {
