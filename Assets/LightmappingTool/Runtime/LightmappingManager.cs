@@ -103,19 +103,22 @@ namespace Toolbox.Lighting
 
         private void SetLightmaps(LightmapPreset preset)
         {
-            SetLightmaps(preset.Lightmaps);
+            SetLightmaps(preset.Lightmaps, preset.LightProbes);
         }
 
-        private void SetLightmaps(LightmapData[] lightmaps)
+        private void SetLightmaps(LightmapData[] lightmaps, LightProbes lightProbes)
         {
             LightmapSettings.lightmaps = lightmaps;
+            LightmapSettings.lightProbes = lightProbes;
         }
-#if UNITY_EDITOR
+
         private void LogInvalidMode(string operationName)
         {
+#if UNITY_EDITOR
             InternalLogger.Log(LogType.Error, $"Cannot perform operation ({operationName}) in current mode ({currentMode}).");
-        }
 #endif
+        }
+
 
         public void Initialize(Mode mode)
         {
@@ -161,7 +164,7 @@ namespace Toolbox.Lighting
             //TODO:
             transitionPreset.Update(blendValue - 0.01f);
             transitionPreset.Update(blendValue);
-            SetLightmaps(transitionPreset.Lightmaps);
+            SetLightmaps(transitionPreset.Lightmaps, transitionPreset.LightProbes);
             return true;
         }
 
@@ -216,7 +219,7 @@ namespace Toolbox.Lighting
                 throw new ArgumentNullException(nameof(preset));
             }
 
-            SetLightmaps(preset.Lightmaps);
+            SetLightmaps(preset.Lightmaps, preset.LightProbes);
         }
 
 

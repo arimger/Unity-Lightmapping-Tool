@@ -39,7 +39,7 @@ namespace Toolbox.Lighting.Editor
             transitionPresetProperty = serializedObject.FindProperty("transitionPreset");
             blendValueProperty = serializedObject.FindProperty("blendValue");
 
-            presetsList = CreateList(presetsProperty);
+            presetsList = EditorHelper.CreateList(presetsProperty);
             presetsList.drawElementCallback = (rect, index, isActive, isFocused) =>
             {
                 var element = presetsProperty.GetArrayElementAtIndex(index);
@@ -58,31 +58,9 @@ namespace Toolbox.Lighting.Editor
 
                 EditorGUI.PropertyField(rect, element, GUIContent.none, element.isExpanded);
             };
-            probesList = CreateList(probesProperty);
+            probesList = EditorHelper.CreateList(probesProperty);
         }
 
-        private ReorderableList CreateList(SerializedProperty property)
-        {
-            return new ReorderableList(serializedObject, property, true, true, true, true)
-            {
-                drawElementCallback = (rect, index, isActive, isFocused) =>
-                {
-                    var element = property.GetArrayElementAtIndex(index);
-                    EditorGUI.PropertyField(rect, element, element.isExpanded);
-                },
-                elementHeightCallback = (index) =>
-                {
-                    var element = property.GetArrayElementAtIndex(index);
-                    return EditorGUI.GetPropertyHeight(element);
-                },
-                drawHeaderCallback = (rect) =>
-                {
-                    var label = EditorGUI.BeginProperty(rect, null, property);
-                    EditorGUI.LabelField(rect, label);
-                    EditorGUI.EndProperty();
-                },
-            };
-        }
 
         private void DrawSwitcherMode()
         {
@@ -156,7 +134,7 @@ namespace Toolbox.Lighting.Editor
                 {
                     if (EditorUtility.DisplayDialog(string.Empty,
                         "Do you want to search for ReflectionProbes and replace the current list?", 
-                        "Just do it", "Cancel"))
+                        "Yes", "Cancel"))
                     {
                         manager.SearchForReflectionProbes();
                     }

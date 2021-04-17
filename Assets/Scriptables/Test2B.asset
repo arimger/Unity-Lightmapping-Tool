@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Test2B
   m_EditorClassIdentifier: 
   presetName: Test2B
+  directory: M:/Libraries/CodingLibrary/Repositories/Unity 2020/UnityLightmappingTool/Assets/Scenes/Test
+    2 - Index Blending/Test_2_Lighting_b
   texturesSets:
   - shadowMask: {fileID: 0}
     lightmapDir: {fileID: 2800000, guid: dddf8f6100907d34aa91731866ea5898, type: 3}
@@ -29,4 +31,6 @@ MonoBehaviour:
   - shadowMask: {fileID: 0}
     lightmapDir: {fileID: 2800000, guid: dfd2d2b5bae4ccd419ad5cd4fbd9dcf2, type: 3}
     lightmapColor: {fileID: 2800000, guid: 6b2c4000b9578174ebcb7d7891ff8e11, type: 3}
-  reflectionProbes: []
+  reflectionProbes:
+  - {fileID: 8900000, guid: beda1bd5ce2e4dd4c9a46bac269324bd, type: 3}
+  lightProbes: {fileID: 25800002, guid: 2e1590a36cf061b419413d4d1b167ba1, type: 2}
