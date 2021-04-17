@@ -44,6 +44,11 @@ namespace Toolbox.Lighting
         {
             get => runtimePreset.TargetPreset.Lightmaps;
         }
+        
+        internal LightProbes LightProbes
+        {
+            get => runtimePreset.TargetPreset.LightProbes;
+        }
 
 
         internal LightmapTransitionPreset(LightmapPreset[] presets)

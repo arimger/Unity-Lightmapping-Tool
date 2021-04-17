@@ -39,6 +39,7 @@ namespace Toolbox.Lighting
             }
 
             TargetPreset.TexturesSets = targetTexturesSets;
+            TargetPreset.LightProbes = mockup.LightProbes;
         }
 
 
