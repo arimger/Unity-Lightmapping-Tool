@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af8f6cc47e3f7c54fb58d7115498bd89, type: 3}
   m_Name: Test2A
   m_EditorClassIdentifier: 
-  lightingName: Test2A
-  targetScene: 
+  presetName: Test2A
   texturesSets:
   - shadowMask: {fileID: 0}
     lightmapDir: {fileID: 2800000, guid: 260533c731b3e8548a1e415be63cad7b, type: 3}

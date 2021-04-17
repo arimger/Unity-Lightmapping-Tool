@@ -2,11 +2,11 @@ using UnityEngine;
 
 namespace Toolbox.Lighting
 {
-    [CreateAssetMenu(fileName = "Lightmap Preset", menuName = "Editor Toolbox/Lighting/Lightmap Preset")]
+    [CreateAssetMenu(fileName = "Lightmap Preset", menuName = "Toolbox/Lighting/Lightmap Preset")]
     public class LightmapPreset : ScriptableObject
     {
         [SerializeField]
-        private string lightingName;
+        private string presetName;
 
         [Space]
 
@@ -19,10 +19,10 @@ namespace Toolbox.Lighting
         private LightmapData[] lightmaps;
 
 
-        public string LightingName
+        public string PresetName
         {
-            get => lightingName;
-            set => lightingName = value;
+            get => presetName;
+            set => presetName = value;
         }
 
         public LightmapTexturesSet[] TexturesSets

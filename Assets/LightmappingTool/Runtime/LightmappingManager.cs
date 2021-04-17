@@ -113,8 +113,7 @@ namespace Toolbox.Lighting
 #if UNITY_EDITOR
         private void LogInvalidMode(string operationName)
         {
-            Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, this,
-                $"Cannot perform operation ({operationName}) in current mode ({currentMode}).");
+            InternalLogger.Log(LogType.Error, $"Cannot perform operation ({operationName}) in current mode ({currentMode}).");
         }
 #endif
 

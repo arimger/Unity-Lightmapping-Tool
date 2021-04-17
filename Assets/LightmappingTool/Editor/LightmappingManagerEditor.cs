@@ -51,7 +51,7 @@ namespace Toolbox.Lighting.Editor
                         {
                             var label = $"Blend [{order}]";
                             EditorGUI.LabelField(rect, label);
-                            rect.xMin += 65.0f;
+                            rect.xMin += Style.presetBlendInfoPadding;
                         }
                     }
                 }
@@ -116,6 +116,7 @@ namespace Toolbox.Lighting.Editor
                 EditorGUILayout.Space();
                 probesList.DoLayoutList();
                 EditorGUILayout.PropertyField(transitionPresetProperty);
+                EditorGUILayout.Space();
                 EditorGUILayout.PropertyField(blendValueProperty);
             }
 
@@ -216,6 +217,8 @@ namespace Toolbox.Lighting.Editor
 
         private static class Style
         {
+            internal static readonly float presetBlendInfoPadding = 65.0f;
+
             internal static readonly GUIContent blendingPresetsAreEmpty = new GUIContent("Presets list is empty!");
             internal static readonly GUIContent managerIsDisabledContent = new GUIContent("Manager is disabled!");
             internal static readonly GUIContent blendingModeHeaderContent = new GUIContent("Content");
