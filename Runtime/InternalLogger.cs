@@ -1,7 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using UnityEngine;
-
-[assembly: InternalsVisibleTo("LightmappingTool-Editor")]
+﻿using UnityEngine;
 
 namespace Toolbox.Lighting
 {

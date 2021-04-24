@@ -21,7 +21,7 @@ namespace Toolbox.Lighting
         [SerializeField, NonReorderable]
         private LightmapTexturesSet[] texturesSets;
 
-        [SerializeField, NonReorderable]
+        [SerializeField, NonReorderable, HideInInspector]
         private Texture[] reflectionProbes;
 
         [SerializeField]

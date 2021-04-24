@@ -14,15 +14,21 @@ namespace Toolbox.Lighting.Editor
 
         private SerializedProperty currentModeProperty;
         private SerializedProperty initOnAwakeProperty;
-        private SerializedProperty presetsProperty;
-        private SerializedProperty probesProperty;
-        private SerializedProperty transitionPresetProperty;
+        private SerializedProperty useEditModeProperty;
+        private SerializedProperty initialPresetsProperty;
+        private SerializedProperty blendingPresetProperty;
         private SerializedProperty blendValueProperty;
 
-        private ReorderableList presetsList;
-        private ReorderableList probesList;
+        private ReorderableList initialPresetsList;
 
+        /// <summary>
+        /// An array of cached presets that can be used for the "SetPresetsToBlend" action.
+        /// </summary>
         private LightmapPreset[] presetsToBlend;
+
+        /// <summary>
+        /// Cached preset that can be used for the "Switch" action.
+        /// </summary>
         private LightmapPreset presetToSwitch;
 
 
@@ -34,31 +40,17 @@ namespace Toolbox.Lighting.Editor
 
             currentModeProperty = serializedObject.FindProperty("currentMode");
             initOnAwakeProperty = serializedObject.FindProperty("initOnAwake");
-            presetsProperty = serializedObject.FindProperty("presets");
-            probesProperty = serializedObject.FindProperty("probes");
-            transitionPresetProperty = serializedObject.FindProperty("transitionPreset");
+            useEditModeProperty = serializedObject.FindProperty("useEditMode");
+            initialPresetsProperty = serializedObject.FindProperty("initialPresets");
+            blendingPresetProperty = serializedObject.FindProperty("blendingPreset");
             blendValueProperty = serializedObject.FindProperty("blendValue");
 
-            presetsList = EditorHelper.CreateList(presetsProperty);
-            presetsList.drawElementCallback = (rect, index, isActive, isFocused) =>
+            initialPresetsList = EditorHelper.CreateList(initialPresetsProperty);
+            initialPresetsList.drawElementCallback = (rect, index, isActive, isFocused) =>
             {
-                var element = presetsProperty.GetArrayElementAtIndex(index);
-                if (manager.IsInitialized)
-                {
-                    if (element.objectReferenceValue is LightmapPreset preset)
-                    {
-                        if (manager.IsPresetBlended(preset, out var order))
-                        {
-                            var label = $"Blend [{order}]";
-                            EditorGUI.LabelField(rect, label);
-                            rect.xMin += Style.presetBlendInfoPadding;
-                        }
-                    }
-                }
-
+                var element = initialPresetsProperty.GetArrayElementAtIndex(index);
                 EditorGUI.PropertyField(rect, element, GUIContent.none, element.isExpanded);
             };
-            probesList = EditorHelper.CreateList(probesProperty);
         }
 
 
@@ -71,7 +63,7 @@ namespace Toolbox.Lighting.Editor
                 {
                     if (GUILayout.Button("Switch Lightmap"))
                     {
-                        manager.SwitchLightmap(presetToSwitch);
+                        manager.SwitchLightmaps(presetToSwitch);
                     }
                 }
 
@@ -81,19 +73,40 @@ namespace Toolbox.Lighting.Editor
 
         private void DrawBlendingMode()
         {
-            EditorGUILayout.Space();
+            EditorGUILayout.PropertyField(useEditModeProperty);
+            EditorGUILayout.PropertyField(initOnAwakeProperty);
+
+            if (initOnAwakeProperty.boolValue)
+            {
+                if (initialPresetsList.count == 0)
+                {
+                    EditorGUILayout.HelpBox(Style.presetsAreEmptyContent.text, MessageType.Warning);
+                }
+
+                initialPresetsList.DoLayoutList();
+                EditorGUILayout.Space();
+            }
+
             using (new EditorGUILayout.VerticalScope(Style.sectionStyle))
             {
                 EditorGUILayout.LabelField(Style.blendingModeHeaderContent, Style.headerStyle);
-                if (presetsList.count == 0)
+
+                if (manager.IsAbleToWork)
                 {
-                    EditorGUILayout.HelpBox(Style.blendingPresetsAreEmpty.text, MessageType.Warning);
+                    if (manager.PresetsToBlendCount == 0)
+                    {
+                        EditorGUILayout.HelpBox("Not enough presets to blend", MessageType.Warning);
+                    }
+
+
+                    EditorGUILayout.Space();
+                    EditorGUILayout.PropertyField(blendingPresetProperty);
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox("Not allowed to work in the Edit mode", MessageType.Warning);
                 }
 
-                presetsList.DoLayoutList();
-                EditorGUILayout.Space();
-                probesList.DoLayoutList();
-                EditorGUILayout.PropertyField(transitionPresetProperty);
                 EditorGUILayout.Space();
                 EditorGUILayout.PropertyField(blendValueProperty);
             }
@@ -101,15 +114,12 @@ namespace Toolbox.Lighting.Editor
             using (new EditorGUILayout.VerticalScope(Style.sectionStyle))
             {
                 EditorGUILayout.LabelField("Actions", Style.headerStyle);
-
-                using (new EditorGUI.DisabledGroupScope(!manager.IsInitialized))
+                EditorGUILayout.Space();
+                using (new EditorGUI.DisabledGroupScope(false))
                 {
                     if (GUILayout.Button("Set Presets To Blend"))
                     {
-                        if (presetsToBlend.Length > 1)
-                        {
-                            manager.SetPresetsToBlend(presetsToBlend);
-                        }
+                        manager.SetPresetsToBlend(presetsToBlend);
                     }
 
                     var size = presetsToBlend.Length;
@@ -129,16 +139,17 @@ namespace Toolbox.Lighting.Editor
                     }
                 }
 
-                EditorGUILayout.Space();
-                if (GUILayout.Button("Search For Probes"))
-                {
-                    if (EditorUtility.DisplayDialog(string.Empty,
-                        "Do you want to search for ReflectionProbes and replace the current list?", 
-                        "Yes", "Cancel"))
-                    {
-                        manager.SearchForReflectionProbes();
-                    }
-                }
+                //TODO: restore reflection probes-related actions
+                //EditorGUILayout.Space();
+                //if (GUILayout.Button("Search For Probes"))
+                //{
+                //    if (EditorUtility.DisplayDialog(string.Empty,
+                //        "Do you want to search for ReflectionProbes and replace the current list?",
+                //        "Yes", "Cancel"))
+                //    {
+                //        manager.SearchForReflectionProbes();
+                //    }
+                //}
             }
         }
 
@@ -155,27 +166,9 @@ namespace Toolbox.Lighting.Editor
             EditorGUILayout.PropertyField(currentModeProperty);
             if (EditorGUI.EndChangeCheck())
             {
-                if (manager.IsInitialized)
-                {
-                    manager.Initialize((LightmappingManager.Mode)currentModeProperty.intValue);
-                }
+                manager.ChangeMode((LightmappingManager.Mode)currentModeProperty.intValue);
             }
 
-            var isInitialized = manager.IsInitialized;
-            using (new EditorGUI.DisabledScope(isInitialized))
-            {
-                EditorGUI.BeginChangeCheck();
-                isInitialized = EditorGUILayout.Toggle("Is Initialized", isInitialized);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    if (isInitialized)
-                    {
-                        manager.Initialize(manager.CurrentMode);
-                    }
-                }
-            }
-
-            EditorGUILayout.PropertyField(initOnAwakeProperty);
             switch (currentModeProperty.intValue)
             {
                 case 0:
@@ -197,9 +190,9 @@ namespace Toolbox.Lighting.Editor
         {
             internal static readonly float presetBlendInfoPadding = 65.0f;
 
-            internal static readonly GUIContent blendingPresetsAreEmpty = new GUIContent("Presets list is empty!");
+            internal static readonly GUIContent presetsAreEmptyContent = new GUIContent("Presets list is empty!");
             internal static readonly GUIContent managerIsDisabledContent = new GUIContent("Manager is disabled!");
-            internal static readonly GUIContent blendingModeHeaderContent = new GUIContent("Content");
+            internal static readonly GUIContent blendingModeHeaderContent = new GUIContent("Blending");
 
             internal static readonly GUIStyle headerStyle = new GUIStyle(EditorStyles.boldLabel);
             internal static readonly GUIStyle sectionStyle = new GUIStyle(EditorStyles.helpBox);
