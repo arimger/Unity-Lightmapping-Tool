@@ -116,11 +116,14 @@ namespace Toolbox.Lighting.Editor
 
                 EditorGUILayout.Space();
                 EditorGUILayout.PropertyField(blendValueProperty);
+                EditorGUILayout.Space();
+                EditorGUILayout.Space();
+                DrawProgressBar();
             }
 
             using (new EditorGUILayout.VerticalScope(Style.sectionStyle))
             {
-                EditorGUILayout.LabelField("Actions", Style.headerStyle);
+                EditorGUILayout.LabelField(Style.actionsSectionHeaderContent, Style.headerStyle);
                 EditorGUILayout.Space();
                 using (new EditorGUI.DisabledGroupScope(false))
                 {
@@ -160,6 +163,42 @@ namespace Toolbox.Lighting.Editor
             }
         }
 
+        private void DrawProgressBar()
+        {
+            var presetsCount = manager.PresetsToBlendCount;
+            if (presetsCount < LightmapTransitionPreset.minimalPresetsToBlend)
+            {
+                return;
+            }
+
+            var rect = GUILayoutUtility.GetRect(0, Style.progressBarHeight);
+            var fillValue = blendValueProperty.floatValue;
+            var fillRect = new Rect(rect.x + Style.fillRectOffset / 2,
+                                    rect.y + Style.fillRectOffset / 2,
+                                    (rect.width - Style.fillRectOffset) * fillValue,
+                                    rect.height - Style.fillRectOffset);
+
+            //create background rect to fill with color
+            if (Event.current.type == EventType.Repaint)
+            {
+                Style.backgroundStyle.Draw(rect, false, false, false, false);
+            }
+
+            //create fill rect based on fill value
+            EditorGUI.DrawRect(fillRect, Style.fillRectColor);
+
+            var step = 1.0f / (presetsCount - 1);
+            //add separators based on internal presets count
+            var markerRect = new Rect(rect);
+            markerRect.xMax = markerRect.xMin + Style.fillSeparatorWidth;
+            var widthStep = rect.width * step;
+            for (var i = 1; i < presetsCount - 1; i++)
+            {
+                markerRect.x += widthStep;
+                EditorGUI.DrawRect(markerRect, Style.separatorColor);
+            }
+        }
+
 
         public override void OnInspectorGUI()
         {
@@ -195,14 +234,21 @@ namespace Toolbox.Lighting.Editor
 
         private static class Style
         {
-            internal static readonly float presetBlendInfoPadding = 65.0f;
+            internal static readonly float progressBarHeight = 18.0f;
+            internal static readonly float fillRectOffset = 4.0f;
+            internal static readonly float fillSeparatorWidth = 2.0f;
+
+            internal static readonly Color fillRectColor = new Color(0.9f, 0.93f, 0.6f);
+            internal static readonly Color separatorColor = EditorGUIUtility.isProSkin ? new Color(0.15f, 0.15f, 0.15f) : new Color(0.65f, 0.65f, 0.65f);
 
             internal static readonly GUIContent presetsAreEmptyContent = new GUIContent("Presets list is empty!");
             internal static readonly GUIContent managerIsDisabledContent = new GUIContent("Manager is disabled!");
             internal static readonly GUIContent blendingModeHeaderContent = new GUIContent("Blending");
+            internal static readonly GUIContent actionsSectionHeaderContent = new GUIContent("Actions");
 
             internal static readonly GUIStyle headerStyle = new GUIStyle(EditorStyles.boldLabel);
             internal static readonly GUIStyle sectionStyle = new GUIStyle(EditorStyles.helpBox);
+            internal static readonly GUIStyle backgroundStyle = new GUIStyle(EditorStyles.helpBox);
         }
     }
 }
