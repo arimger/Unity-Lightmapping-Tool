@@ -165,7 +165,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 41148ec64aee787468c1d7b8b8a1b35e, type: 2}
     - {fileID: 11400000, guid: d9bf81ed437e4914dbb5b6bd980166d6, type: 2}
     allowedIndexes: 0101010101
-  blendValue: 0.301
+  blendValue: 0.541
 --- !u!4 &1991417
 Transform:
   m_ObjectHideFlags: 0

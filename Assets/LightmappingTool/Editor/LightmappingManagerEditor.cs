@@ -93,14 +93,21 @@ namespace Toolbox.Lighting.Editor
 
                 if (manager.IsAbleToWork)
                 {
-                    if (manager.PresetsToBlendCount == 0)
+                    if (manager.IsAbleToBlend)
                     {
-                        EditorGUILayout.HelpBox("Not enough presets to blend", MessageType.Warning);
+                        if (manager.PresetsToBlendCount == 0)
+                        {
+                            EditorGUILayout.HelpBox("Not enough presets to blend", MessageType.Warning);
+                        }
+
+
+                        EditorGUILayout.Space();
+                        EditorGUILayout.PropertyField(blendingPresetProperty);
                     }
-
-
-                    EditorGUILayout.Space();
-                    EditorGUILayout.PropertyField(blendingPresetProperty);
+                    else
+                    {
+                        EditorGUILayout.HelpBox("Set presets to re-initialize mode", MessageType.Warning);
+                    }
                 }
                 else
                 {

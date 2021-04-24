@@ -62,6 +62,11 @@ namespace Toolbox.Lighting
             }
         }
 
+        public bool IsAbleToBlend
+        {
+            get => blendingPreset != null ? blendingPreset.IsReady : false;
+        }
+
         /// <summary>
         /// Presets used to initialize blending processes.
         /// </summary>
@@ -105,13 +110,12 @@ namespace Toolbox.Lighting
                 return;
             }
 #endif
-
             if (currentMode != Mode.Blending)
             {
                 return;
             }
 
-            //NOTE: during assembly reload in the Edit mode we will lose all properties
+            //NOTE: during recompilation in the Edit mode we will lose all properties
 #if UNITY_EDITOR
             if (blendingPreset.IsSafe)
             {
@@ -120,8 +124,7 @@ namespace Toolbox.Lighting
             else
             {
                 //reload blending preset with last serialized values
-                var presetsToBlend = blendingPreset != null ? blendingPreset.BlendedPresets : new LightmapPreset[0];
-                ChangeModeToBlending(false, presetsToBlend);
+                RestoreBlendingPreset();
             }
 #else
             blendingPreset.Update(blendValue);
@@ -163,6 +166,20 @@ namespace Toolbox.Lighting
 #if UNITY_EDITOR
             InternalLogger.Log(LogType.Error, $"Cannot perform operation ({operationName}) in current mode ({currentMode}).");
 #endif
+        }
+
+        private void RestoreBlendingPreset()
+        {
+            if (blendingPreset == null)
+            {
+                return;
+            }
+
+            var presetsToBlend = blendingPreset.BlendedPresets;
+            var allowedIndexes = blendingPreset.AllowedIndexes;
+            ChangeModeToBlending();
+            SetPresetsToBlend(presetsToBlend);
+            SetAllowedIndexes(allowedIndexes);
         }
 
 

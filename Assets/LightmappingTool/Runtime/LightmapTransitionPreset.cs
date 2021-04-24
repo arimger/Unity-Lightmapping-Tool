@@ -45,12 +45,22 @@ namespace Toolbox.Lighting
         /// <summary>
         /// Used to speed-up checks.
         /// </summary>
-        private Dictionary<LightmapPreset, int> mappedBlendedPresets;
+        public Dictionary<LightmapPreset, int> mappedBlendedPresets;
 
 
         internal int PresetsToBlendCount
         {
             get; private set;
+        }
+
+        internal LightmapPreset[] BlendedPresets
+        {
+            get => blendedPresets;
+        }
+
+        public bool[] AllowedIndexes
+        { 
+            get => allowedIndexes; 
         }
 
         /// <summary>
@@ -66,9 +76,12 @@ namespace Toolbox.Lighting
             get; private set;
         }
 
+        /// <summary>
+        /// Indicates if preset is properly initialized.
+        /// </summary>
         internal bool IsReady
         {
-            get; private set;
+            get => runtimePreset != null && runtimePreset.TargetPreset;
         }
 
         internal bool HasProbes
@@ -81,6 +94,9 @@ namespace Toolbox.Lighting
             get; set;
         }
 
+        /// <summary>
+        /// Lightmaps created for the runtime processing.
+        /// </summary>
         internal LightmapData[] Lightmaps
         {
             get => runtimePreset.TargetPreset.Lightmaps;
@@ -89,11 +105,6 @@ namespace Toolbox.Lighting
         internal LightProbes LightProbes
         {
             get => runtimePreset.TargetPreset.LightProbes;
-        }
-
-        internal LightmapPreset[] BlendedPresets
-        {
-            get => blendedPresets;
         }
 
         /// <summary>
@@ -136,7 +147,6 @@ namespace Toolbox.Lighting
                 allowedIndexes[i] = true;
             }
 
-            IsReady = true;
             OnReady?.Invoke();
         }
 
@@ -267,7 +277,7 @@ namespace Toolbox.Lighting
 
         internal bool Update(float blendValue)
         {
-            if ((Mathf.Approximately(lastBlendValue, blendValue) && !IsDirty) || !IsReady)
+            if (!IsReady || (Mathf.Approximately(lastBlendValue, blendValue) && !IsDirty))
             {
                 return false;
             }
@@ -309,10 +319,9 @@ namespace Toolbox.Lighting
 
             PresetsToBlendCount = presetsToBlend.Length;
             mappedBlendedPresets = new Dictionary<LightmapPreset, int>(PresetsToBlendCount);
-            LightmapPreset preset;
             for (var i = 0; i < PresetsToBlendCount; i++)
             {
-                preset = presetsToBlend[i];
+                var preset = presetsToBlend[i];
                 if (mappedBlendedPresets.ContainsKey(preset))
                 {
                     continue;
@@ -331,11 +340,6 @@ namespace Toolbox.Lighting
             if (allowedIndexes == null)
             {
                 throw new ArgumentNullException(nameof(allowedIndexes));
-            }
-
-            if (allowedIndexes.Length != PresetsToBlendCount)
-            {
-                throw new ArgumentException(nameof(allowedIndexes));
             }
 
             this.allowedIndexes = allowedIndexes;
