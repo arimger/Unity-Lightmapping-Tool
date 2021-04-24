@@ -1,9 +1,12 @@
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using Object = UnityEngine.Object;
+
+[assembly: InternalsVisibleTo("LightmappingTool-Editor")]
 
 namespace Toolbox.Lighting
 {
@@ -20,20 +23,20 @@ namespace Toolbox.Lighting
         [SerializeField]
         private Mode currentMode = Mode.Blending;
 
-        private bool isInitialized;
         [SerializeField]
         private bool initOnAwake = true;
+        [SerializeField]
+        private bool useEditMode = true;
 
-        [Space]
+        [SerializeField, FormerlySerializedAs("presets")]
+        private LightmapPreset[] initialPresets;
+
+        //TODO: cache and serialize probes placed in the Scene
+        //[SerializeField]
+        //private CachedReflectionProbe[] probes;
 
         [SerializeField]
-        private LightmapPreset[] presets;
-
-        [SerializeField]
-        private CachedReflectionProbe[] probes;
-
-        [SerializeField]
-        private LightmapTransitionPreset transitionPreset;
+        private LightmapTransitionPreset blendingPreset;
 
         [SerializeField, Range(0.0f, 1.0f)]
         private float blendValue;
@@ -44,9 +47,24 @@ namespace Toolbox.Lighting
             get => currentMode;
         }
 
-        public bool IsInitialized
+        /// <summary>
+        /// Indicates if no property is blocking <see cref="LightmappingManager"/> from initialization or updates.
+        /// </summary>
+        public bool IsAbleToWork
         {
-            get => isInitialized;
+            get
+            {
+#if UNITY_EDITOR
+                return useEditMode || EditorApplication.isPlaying;
+#else
+                return true;
+#endif
+            }
+        }
+
+        public bool IsAbleToBlend
+        {
+            get => blendingPreset != null ? blendingPreset.IsReady : false;
         }
 
         /// <summary>
@@ -54,12 +72,12 @@ namespace Toolbox.Lighting
         /// </summary>
         public LightmapPreset[] Presets
         {
-            get => presets;
+            get => initialPresets;
         }
 
-        public int? PresetsToBlendCount
+        public int PresetsToBlendCount
         {
-            get => transitionPreset?.PresetsToBlendCount;
+            get => blendingPreset != null ? blendingPreset.PresetsToBlendCount : 0;
         }
 
         /// <summary>
@@ -71,11 +89,6 @@ namespace Toolbox.Lighting
             set => blendValue = value;
         }
 
-        private bool ShouldBeUpdated
-        {
-            get => currentMode == Mode.Blending && isInitialized;
-        }
-
 
         private void Awake()
         {
@@ -83,55 +96,104 @@ namespace Toolbox.Lighting
             {
                 Initialize(currentMode);
             }
+            else
+            {
+                ChangeMode(currentMode);
+            }
         }
 
         private void Update()
         {
-            if (!ShouldBeUpdated)
+#if UNITY_EDITOR
+            if (!IsAbleToWork)
+            {
+                return;
+            }
+#endif
+            if (currentMode != Mode.Blending)
             {
                 return;
             }
 
-            transitionPreset.Update(blendValue);
+            //NOTE: during recompilation in the Edit mode we will lose all properties
+#if UNITY_EDITOR
+            if (blendingPreset.IsSafe)
+            {
+                blendingPreset.Update(blendValue);
+            }
+            else
+            {
+                //reload blending preset with last serialized values
+                RestoreBlendingPreset();
+            }
+#else
+            blendingPreset.Update(blendValue);
+#endif
         }
 
         private void OnDestroy()
         {
-            transitionPreset?.Dispose();
-            isInitialized = false;
+            blendingPreset?.Dispose();
+        }
+
+
+        private void Initialize(Mode mode)
+        {
+            switch (mode)
+            {
+                case Mode.Blending:
+                    ChangeModeToBlending(true, initialPresets);
+                    break;
+                case Mode.Switcher:
+                    ChangeModeToSwitcher();
+                    break;
+            }
         }
 
         private void SetLightmaps(LightmapPreset preset)
         {
-            SetLightmaps(preset.Lightmaps);
+            SetLightmaps(preset.Lightmaps, preset.LightProbes);
         }
 
-        private void SetLightmaps(LightmapData[] lightmaps)
+        private void SetLightmaps(LightmapData[] lightmaps, LightProbes lightProbes)
         {
             LightmapSettings.lightmaps = lightmaps;
+            LightmapSettings.lightProbes = lightProbes;
         }
-#if UNITY_EDITOR
-        private void LogInvalidMode(string operationName)
-        {
-            Debug.LogFormat(LogType.Error, LogOption.NoStacktrace, this,
-                $"Cannot perform operation ({operationName}) in current mode ({currentMode}).");
-        }
-#endif
 
-        public void Initialize(Mode mode)
+        private void LogModeError(string operationName)
         {
-            var success = false;
-            switch (mode)
+#if UNITY_EDITOR
+            InternalLogger.Log(LogType.Error, $"Cannot perform operation ({operationName}) in current mode ({currentMode}).");
+#endif
+        }
+
+        private void RestoreBlendingPreset()
+        {
+            if (blendingPreset == null)
             {
-                case Mode.Blending:
-                    success = ChangeModeToBlending(true, presets);
-                    break;
-                case Mode.Switcher:
-                    success = ChangeModeToSwitcher(presets[0]);
-                    break;
+                return;
             }
 
-            isInitialized = success;
+            var presetsToBlend = blendingPreset.BlendedPresets;
+            var allowedIndexes = blendingPreset.AllowedIndexes;
+            ChangeModeToBlending();
+            SetPresetsToBlend(presetsToBlend);
+            SetAllowedIndexes(allowedIndexes);
+        }
+
+
+        public bool ChangeMode(Mode mode)
+        {
+            switch (mode)
+            {
+                case Mode.Switcher:
+                    return ChangeModeToSwitcher();
+                case Mode.Blending:
+                    return ChangeModeToBlending();
+                default:
+                    return false;
+            }
         }
 
         public bool ChangeModeToSwitcher(LightmapPreset presetToSwitch = null)
@@ -145,24 +207,30 @@ namespace Toolbox.Lighting
             return true;
         }
 
-        public bool ChangeModeToBlending(bool reset, params LightmapPreset[] presetsToBlend)
+        public bool ChangeModeToBlending(bool reset = false, params LightmapPreset[] presetsToBlend)
         {
-            if (presetsToBlend == null || presetsToBlend.Length < 2)
-            {
-                return false;
-            }
-
             currentMode = Mode.Blending;
-            if (transitionPreset == null || reset)
+            //NOTE: we have to assing runtime preset when it's ready
+            if (blendingPreset == null || !blendingPreset.IsSafe || reset)
             {
-                transitionPreset = new LightmapTransitionPreset(presets);
+                blendingPreset = new LightmapTransitionPreset(new Material(Shader.Find("Hidden/Lightmap Blend")));
+                blendingPreset.OnReady += () =>
+                {
+                    SetLightmaps(blendingPreset.Lightmaps, blendingPreset.LightProbes);
+                };
+            }
+            else if (blendingPreset.IsReady)
+            {
+                SetLightmaps(blendingPreset.Lightmaps, blendingPreset.LightProbes);
             }
 
-            transitionPreset.SetPresetsToBlend(presetsToBlend);
-            //TODO:
-            transitionPreset.Update(blendValue - 0.01f);
-            transitionPreset.Update(blendValue);
-            SetLightmaps(transitionPreset.Lightmaps);
+            //use initial array to initialize current blending preset
+            if (presetsToBlend != null && 
+                presetsToBlend.Length >= LightmapTransitionPreset.minimalPresetsToBlend)
+            {
+                SetPresetsToBlend(presetsToBlend);
+            }
+
             return true;
         }
 
@@ -170,22 +238,29 @@ namespace Toolbox.Lighting
         {
             if (currentMode == Mode.Switcher)
             {
-                LogInvalidMode(nameof(SetPresetsToBlend));
+                LogModeError(nameof(SetPresetsToBlend));
                 return;
             }
 
-            transitionPreset.SetPresetsToBlend(presetsToBlend);
+            blendingPreset.SetPresetsToBlend(presetsToBlend);
+            blendingPreset.Update(blendValue - 0.01f);
+            blendingPreset.Update(blendValue);
         }
 
         public void SetAllowedIndexes(bool[] allowedIndexes)
         {
             if (currentMode == Mode.Switcher)
             {
-                LogInvalidMode(nameof(SetAllowedIndexes));
+                LogModeError(nameof(SetAllowedIndexes));
                 return;
             }
 
-            transitionPreset.SetAllowedIndexes(allowedIndexes);
+            blendingPreset.SetAllowedIndexes(allowedIndexes);
+        }
+
+        public bool IsPresetBlended(LightmapPreset preset)
+        {
+            return IsPresetBlended(preset, out _);
         }
 
         public bool IsPresetBlended(LightmapPreset preset, out int order)
@@ -196,19 +271,14 @@ namespace Toolbox.Lighting
                 return false;
             }
 
-            return transitionPreset.IsPresetBlended(preset, out order);
+            return blendingPreset.IsPresetBlended(preset, out order);
         }
 
-        public void SearchForReflectionProbes()
-        {
-            probes = FindObjectsOfType<CachedReflectionProbe>();
-        }
-
-        public void SwitchLightmap(LightmapPreset preset)
+        public void SwitchLightmaps(LightmapPreset preset)
         {
             if (currentMode == Mode.Blending)
             {
-                LogInvalidMode(nameof(SwitchLightmap));
+                LogModeError(nameof(SwitchLightmaps));
                 return;
             }
 
@@ -217,24 +287,17 @@ namespace Toolbox.Lighting
                 throw new ArgumentNullException(nameof(preset));
             }
 
-            SetLightmaps(preset.Lightmaps);
+            SetLightmaps(preset.Lightmaps, preset.LightProbes);
         }
 
-
-        public static void SafeObjectDestroy(Object target)
+        public void SearchForReflectionProbes()
         {
-#if UNITY_EDITOR
-            if (EditorApplication.isPlaying)
-            {
-                Object.Destroy(target);
-            }
-            else
-            {
-                Object.DestroyImmediate(target);
-            }
-#else
-            Object.Destroy(TargetPreset);
-#endif
+            SearchForReflectionProbes(false);
+        }
+
+        public void SearchForReflectionProbes(bool includeInactive)
+        {
+            throw new NotImplementedException();
         }
     }
 }

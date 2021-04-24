@@ -1,10 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEditor;
 
 namespace Toolbox.Lighting.Editor
 {
     using Editor = UnityEditor.Editor;
 
+    [Obsolete]
     [CustomEditor(typeof(CachedReflectionProbe))]
     internal class CachedReflectionProbeEditor : Editor
     {
@@ -16,7 +18,6 @@ namespace Toolbox.Lighting.Editor
             if (component.ReflectionProbe)
             {
                 var probe = component.ReflectionProbe;
-
                 EditorGUILayout.ObjectField(probe.bakedTexture, typeof(Texture), true);
             }
         }

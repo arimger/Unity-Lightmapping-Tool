@@ -3,8 +3,10 @@ using UnityEngine;
 
 namespace Toolbox.Lighting
 {
+    using Toolbox.Lighting.Utilities;
+
     /// <summary>
-    /// Creates runtime lightmap preset based on given mockup.
+    /// Creates runtime lightmap preset based on the given mockup.
     /// </summary>
     internal class LightmapRuntimePreset : IDisposable
     {
@@ -39,6 +41,7 @@ namespace Toolbox.Lighting
             }
 
             TargetPreset.TexturesSets = targetTexturesSets;
+            TargetPreset.LightProbes = mockup.LightProbes;
         }
 
 
@@ -59,7 +62,7 @@ namespace Toolbox.Lighting
 
         public void Dispose()
         {
-            LightmappingManager.SafeObjectDestroy(TargetPreset);
+            ObjectUtility.SafeDestroy(TargetPreset);
         }
     }
 }
