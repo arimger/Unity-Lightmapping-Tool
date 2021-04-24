@@ -6,9 +6,9 @@ This repository contains **experimental** tool for blending and switching lightm
 
 Features:
 - switching lightmaps in runtime and in the Edit mode
-- blending lightmaps in runtime and in the Edit mode (possibility to blend multiple lightmaps and particular texture indexes)
+- blending lightmaps in runtime and in the Edit mode (blend multiple lightmaps and particular texture indexes)
 - serializing lightmaps in dedicated SO files
-- loading lightmaps from directory
+- loading lightmaps from a directory
 
 Problems to solve:
 - ReflectionProbes blending is disabled 
@@ -20,4 +20,4 @@ Unity 2019.1 or newer
 
 ## Demonstration
 
-https://www.youtube.com/watch?v=Nj0vsYJFZqY&ab_channel=Mi%C5%82oszMatkowski
+[![demonstration](https://img.youtube.com/vi/Nj0vsYJFZqY/0.jpg)](https://www.youtube.com/watch?v=Nj0vsYJFZqY)
