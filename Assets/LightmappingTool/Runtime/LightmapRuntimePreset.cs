@@ -3,6 +3,8 @@ using UnityEngine;
 
 namespace Toolbox.Lighting
 {
+    using Toolbox.Lighting.Utilities;
+
     /// <summary>
     /// Creates runtime lightmap preset based on the given mockup.
     /// </summary>
@@ -60,7 +62,7 @@ namespace Toolbox.Lighting
 
         public void Dispose()
         {
-            LightmappingManager.SafeObjectDestroy(TargetPreset);
+            ObjectUtility.SafeDestroy(TargetPreset);
         }
     }
 }

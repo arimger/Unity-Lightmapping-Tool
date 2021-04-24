@@ -34,9 +34,11 @@ namespace Toolbox.Lighting.Editor
             using (new EditorGUILayout.VerticalScope(Style.sectionStyle))
             {
                 EditorGUILayout.LabelField("Lightmap", Style.headerStyle);
+                EditorGUILayout.Space();
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(texturesSetsProperty);
-                EditorGUILayout.PropertyField(reflectionProbesProperty);
+                //TODO:
+                //EditorGUILayout.PropertyField(reflectionProbesProperty);
                 EditorGUI.indentLevel--;
                 EditorGUILayout.PropertyField(lightProbesProperty);
             }
@@ -45,7 +47,7 @@ namespace Toolbox.Lighting.Editor
             using (new EditorGUILayout.VerticalScope(Style.sectionStyle))
             {
                 EditorGUILayout.LabelField("Actions", Style.headerStyle);
-
+                EditorGUILayout.Space();
                 if (GUILayout.Button(Style.loadSceneButtonLabel))
                 {
                     var preset = target as LightmapPreset;
