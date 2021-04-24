@@ -32,9 +32,10 @@ namespace Toolbox.Lighting
 
         private readonly bool? isSafe;
 
-        private float lastBlendValue;
-
         private LightmapRuntimePreset runtimePreset;
+
+        [SerializeField, HideInInspector]
+        private float lastBlendValue;
 
         [SerializeField, NonReorderable]
         private LightmapPreset[] blendedPresets;
