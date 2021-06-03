@@ -40,7 +40,8 @@ namespace Toolbox.Lighting.Editor
                 //TODO:
                 //EditorGUILayout.PropertyField(reflectionProbesProperty);
                 EditorGUI.indentLevel--;
-                EditorGUILayout.PropertyField(lightProbesProperty);
+                EditorGUILayout.Space();
+                EditorGUILayout.Toggle("Light Probes loaded", lightProbesProperty.objectReferenceValue);
             }
 
             EditorGUILayout.Space();
