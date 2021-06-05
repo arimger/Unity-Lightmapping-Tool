@@ -37,10 +37,16 @@ namespace Toolbox.Lighting
         [SerializeField, HideInInspector]
         private float lastBlendValue;
 
-        [SerializeField, NonReorderable]
+        [SerializeField]
+#if UNITY_2020_1_OR_NEWER
+        [NonReorderable]
+#endif
         private LightmapPreset[] blendedPresets;
 
-        [SerializeField, NonReorderable]
+        [SerializeField]
+#if UNITY_2020_1_OR_NEWER
+        [NonReorderable]
+#endif
         private bool[] allowedIndexes;
 
         /// <summary>
@@ -60,8 +66,8 @@ namespace Toolbox.Lighting
         }
 
         public bool[] AllowedIndexes
-        { 
-            get => allowedIndexes; 
+        {
+            get => allowedIndexes;
         }
 
         /// <summary>
@@ -152,10 +158,10 @@ namespace Toolbox.Lighting
         }
 
         private void PrepareInSceneProbes()
-        {
+        {                
+            //TODO: prepare transition textures for available reflection probes
             if (UseProbes)
             {
-                //TODO: prepare transition textures for available reflection probes
                 //for (var i = 0; i < cachedSceneProbes.Length; i++)
                 //{
                 //    var reflectionProbe = cachedSceneProbes[i].ReflectionProbe;

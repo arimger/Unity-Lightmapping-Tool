@@ -4,9 +4,9 @@ using UnityEngine;
 using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
-#endif
 
 [assembly: InternalsVisibleTo("LightmappingTool-Editor")]
+#endif
 
 namespace Toolbox.Lighting
 {
@@ -25,15 +25,18 @@ namespace Toolbox.Lighting
 
         [SerializeField]
         private bool initOnAwake = true;
+#if UNITY_EDITOR
         [SerializeField]
         private bool useEditMode = true;
-
+#endif
         [SerializeField, FormerlySerializedAs("presets")]
         private LightmapPreset[] initialPresets;
 
-        //TODO: cache and serialize probes placed in the Scene
-        //[SerializeField]
-        //private CachedReflectionProbe[] probes;
+        [SerializeField]
+#if UNITY_2020_1_OR_NEWER
+        [NonReorderable]
+#endif
+        private CachedReflectionProbe[] cachedProbes;
 
         [SerializeField]
         private LightmapTransitionPreset blendingPreset;
@@ -225,7 +228,7 @@ namespace Toolbox.Lighting
             }
 
             //use initial array to initialize current blending preset
-            if (presetsToBlend != null && 
+            if (presetsToBlend != null &&
                 presetsToBlend.Length >= LightmapTransitionPreset.minimalPresetsToBlend)
             {
                 SetPresetsToBlend(presetsToBlend);
@@ -294,10 +297,10 @@ namespace Toolbox.Lighting
         {
             SearchForReflectionProbes(false);
         }
-
+        
         public void SearchForReflectionProbes(bool includeInactive)
         {
-            throw new NotImplementedException();
+            cachedProbes = FindObjectsOfType<CachedReflectionProbe>(includeInactive);
         }
     }
 }
