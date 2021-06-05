@@ -18,10 +18,16 @@ namespace Toolbox.Lighting
         [SerializeField]
         private string directory;
 
-        [SerializeField, NonReorderable]
+        [SerializeField]
+#if UNITY_2020_1_OR_NEWER
+        [NonReorderable]
+#endif
         private LightmapTexturesSet[] texturesSets;
 
-        [SerializeField, NonReorderable, HideInInspector]
+        [SerializeField]
+#if UNITY_2020_1_OR_NEWER
+        [NonReorderable]
+#endif
         private Texture[] reflectionProbes;
 
         [SerializeField]
@@ -136,7 +142,7 @@ namespace Toolbox.Lighting
         {
             var reflectionProbes = new Texture[cubemaps.Count];
             for (var i = 0; i < cubemaps.Count; i++)
-            {                
+            {
                 //TODO: validation
                 reflectionProbes[i] = cubemaps[i];
             }

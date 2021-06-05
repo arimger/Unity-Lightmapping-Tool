@@ -13,7 +13,7 @@ namespace Toolbox.Lighting.Editor
         private SerializedProperty texturesSetsProperty;
         private SerializedProperty reflectionProbesProperty;
         private SerializedProperty lightProbesProperty;
-       
+
 
         private void OnEnable()
         {
@@ -37,10 +37,13 @@ namespace Toolbox.Lighting.Editor
                 EditorGUILayout.Space();
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(texturesSetsProperty);
-                //TODO:
-                //EditorGUILayout.PropertyField(reflectionProbesProperty);
+                EditorHelper.DrawNativeList(reflectionProbesProperty, true, false, (element, index, label) =>
+                {
+                    EditorGUILayout.PropertyField(element, GUIContent.none);
+                });
                 EditorGUI.indentLevel--;
-                EditorGUILayout.PropertyField(lightProbesProperty);
+                EditorGUILayout.Space();
+                EditorGUILayout.Toggle("Light Probes loaded", lightProbesProperty.objectReferenceValue);
             }
 
             EditorGUILayout.Space();

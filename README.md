@@ -5,9 +5,9 @@
 This repository contains **experimental** tool for blending and switching lightmaps.
 
 Features:
+- serializing lightmaps into dedicated SO files
 - switching lightmaps in runtime and in the Edit mode
 - blending lightmaps in runtime and in the Edit mode (blend multiple lightmaps and particular texture indexes)
-- serializing lightmaps in dedicated SO files
 - loading lightmaps from a directory
 
 Problems to solve:
