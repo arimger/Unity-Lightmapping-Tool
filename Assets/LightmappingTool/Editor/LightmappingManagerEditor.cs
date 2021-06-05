@@ -16,6 +16,7 @@ namespace Toolbox.Lighting.Editor
         private SerializedProperty initOnAwakeProperty;
         private SerializedProperty useEditModeProperty;
         private SerializedProperty initialPresetsProperty;
+        private SerializedProperty cachedProbesProperty;
         private SerializedProperty blendingPresetProperty;
         private SerializedProperty blendValueProperty;
 
@@ -42,6 +43,7 @@ namespace Toolbox.Lighting.Editor
             initOnAwakeProperty = serializedObject.FindProperty("initOnAwake");
             useEditModeProperty = serializedObject.FindProperty("useEditMode");
             initialPresetsProperty = serializedObject.FindProperty("initialPresets");
+            cachedProbesProperty = serializedObject.FindProperty("cachedProbes");
             blendingPresetProperty = serializedObject.FindProperty("blendingPreset");
             blendValueProperty = serializedObject.FindProperty("blendValue");
 
@@ -56,9 +58,22 @@ namespace Toolbox.Lighting.Editor
 
         private void DrawSwitcherMode()
         {
+            EditorGUILayout.Space();
+            EditorGUILayout.PropertyField(cachedProbesProperty);
+            EditorGUILayout.Space();
             using (new EditorGUILayout.VerticalScope(Style.sectionStyle))
             {
                 EditorGUILayout.LabelField("Actions", Style.headerStyle);
+                if (GUILayout.Button("Search For Probes"))
+                {
+                    if (EditorUtility.DisplayDialog(string.Empty,
+                        "Do you want to search for ReflectionProbes and replace the current list?",
+                        "Yes", "Cancel"))
+                    {
+                        manager.SearchForReflectionProbes();
+                    }
+                }
+
                 using (new EditorGUI.DisabledScope(presetToSwitch == null))
                 {
                     if (GUILayout.Button("Switch Lightmap"))
@@ -148,18 +163,6 @@ namespace Toolbox.Lighting.Editor
                         presetsToBlend[i] = EditorGUILayout.ObjectField(presetsToBlend[i], typeof(LightmapPreset), false) as LightmapPreset;
                     }
                 }
-
-                //TODO: restore reflection probes-related actions
-                //EditorGUILayout.Space();
-                //if (GUILayout.Button("Search For Probes"))
-                //{
-                //    if (EditorUtility.DisplayDialog(string.Empty,
-                //        "Do you want to search for ReflectionProbes and replace the current list?",
-                //        "Yes", "Cancel"))
-                //    {
-                //        manager.SearchForReflectionProbes();
-                //    }
-                //}
             }
         }
 

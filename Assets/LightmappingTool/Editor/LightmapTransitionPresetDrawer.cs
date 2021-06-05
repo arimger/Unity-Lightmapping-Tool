@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace Toolbox.Lighting.Editor
@@ -7,81 +6,11 @@ namespace Toolbox.Lighting.Editor
     [CustomPropertyDrawer(typeof(LightmapTransitionPreset))]
     internal class LightmapTransitionPresetDrawer : PropertyDrawer
     {
-        /// <summary>
-        /// Prevents context click events.
-        /// </summary>
-        private void PreventActions()
-        {
-            switch (Event.current.type)
-            {
-                case EventType.ContextClick:
-                    Event.current.Use();
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Draws generic list in the native way.
-        /// </summary>
-        private void DrawNativeList(ref Rect position, SerializedProperty property, bool preventActions, 
-            Action<Rect, SerializedProperty, int, GUIContent> drawElementAction, string elementLabel = null)
-        {
-            var label = EditorGUI.BeginProperty(position, new GUIContent(property.displayName), property);
-            property.isExpanded = EditorGUI.Foldout(position, property.isExpanded, label, true);
-            position.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-            if (property.isExpanded)
-            {
-                //cache all needed property references
-                var targetProperty = property.Copy();
-                var endingProperty = property.GetEndProperty();
-                var index = 0;
-
-                EditorGUI.indentLevel++;
-                targetProperty.NextVisible(true);
-                //handle size property
-                using (new EditorGUI.DisabledScope(true))
-                {
-                    EditorGUI.PropertyField(position, targetProperty.Copy());
-                }
-
-                position.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-
-                //iterate over all children (but only 1 level depth)
-                while (targetProperty.NextVisible(false))
-                {
-                    if (SerializedProperty.EqualContents(targetProperty, endingProperty))
-                    {
-                        break;
-                    }
-
-                    //use context actions
-                    if (preventActions)
-                    {
-                        PreventActions();
-                    }
-
-                    //handle each element
-                    var element = targetProperty.Copy();
-                    var content = elementLabel != null
-                        ? new GUIContent($"{elementLabel} {index}")
-                        : new GUIContent(element.displayName);
-                    drawElementAction(position, element, index, content);
-                    position.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-                    index++;
-                }
-
-                EditorGUI.indentLevel--;
-            }
-
-            EditorGUI.EndProperty();
-        }
-
-
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             var blendedPresetsProperty = property.FindPropertyRelative("blendedPresets");
             var allowedIdnexesProperty = property.FindPropertyRelative("allowedIndexes");
-            return EditorGUI.GetPropertyHeight(blendedPresetsProperty, label, blendedPresetsProperty.isExpanded) + 
+            return EditorGUI.GetPropertyHeight(blendedPresetsProperty, label, blendedPresetsProperty.isExpanded) +
                    EditorGUI.GetPropertyHeight(allowedIdnexesProperty, label, allowedIdnexesProperty.isExpanded);
         }
 
@@ -104,8 +33,8 @@ namespace Toolbox.Lighting.Editor
 
             position.yMax = position.yMin + EditorGUIUtility.singleLineHeight;
             EditorGUI.indentLevel++;
-            DrawNativeList(ref position, blendedPresetsProperty, true, (rect, element, index, label) =>
-            {                    
+            EditorHelper.DrawNativeList(ref position, blendedPresetsProperty, true, true, (rect, element, index, label) =>
+            {
                 //additionally mark currently blended presets
                 if (index == indexA || index == indexB)
                 {
@@ -118,7 +47,7 @@ namespace Toolbox.Lighting.Editor
                     EditorGUI.PropertyField(rect, element, label, element.isExpanded);
                 }
             }, "Position");
-            DrawNativeList(ref position, allowedIdnexesProperty, true, (rect, element, index, label) =>
+            EditorHelper.DrawNativeList(ref position, allowedIdnexesProperty, true, true, (rect, element, index, label) =>
             {
                 EditorGUI.PropertyField(rect, element, label, element.isExpanded);
             }, "Index");
